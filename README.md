@@ -114,3 +114,162 @@
                 -S /home/yjiang/liming/mule_hinny/analysis/mule.mapping/$i/$i.map.sam
         
         done
+        
+  extract the unmapped reads
+  
+    #!/bin/sh
+      for i in ENS_L2_I012 \
+      EHM_L2_I021 \
+      EFB_L4_I046 \
+      DNS_L2_I011 \
+      DHM_L2_I010 \
+      DFB_L4_I045 \
+      CNS_L6_I027 \
+      CHM_L2_I008 \
+      CFB_L4_I044 \
+      BNS-1_L2_I007 \
+      BHN1_L6_I026 \
+      BFB_L4_I041 \
+      ANS-1_L2_I006 \
+      AHM-1_L2_I005 \
+      AFB_L4_I042 \
+      
+      do
+      
+      samtools view -f 0x4 \
+              /home/yjiang/liming/mule_hinny/analysis/mule.mapping/$i/$i.map.sam \
+              > /home/yjiang/liming/mule_hinny/analysis/mule_sam_fastq/$i.unmap.sam
+      
+      done
+      
+umapped.sam2fastq
+
+  #!/bin/sh
+
+  java -Xmx4g -jar /home/yjiang/liming/bin/picard-tools-1.119/SamToFastq.jar \
+        INPUT=/home/yjiang/liming/mule_hinny/analysis/mule_sam_fastq/BHN1_L6_I026.unmap.sam \
+        FASTQ=BHN1_L6_I026_1.fastq \
+        SECOND_END_FASTQ=BHN1_L6_I026_2.fastq
+        
+Tophat mapping
+      
+  for i in 1 \
+  2 \
+  4 \
+  5 \
+  6 \
+  9 \
+  10 \
+  11 \
+  12 \
+  13 \
+  AFB_L4_I042 \
+  AHM-1_L2_I005 \
+  ANS-1_L2_I006 \
+  BFB_L4_I041 \
+  BHM1_L6_I026 \
+  BNS-1_L2_I007 \
+  CFB_L4_I044 \
+  CHM_L2_I008 \
+  CNS_L6_I027 \
+  DFB_L4_I045 \
+  DHM_L2_I010 \
+  DNS_L2_I011 \
+  EFB_L4_I046 \
+  EHM_L2_I021 \
+  ENS_L2_I012
+  
+  do
+  
+  mkdir /home/yjiang/liming/mule_hinny/analysis/tophat/$i/
+  
+  cd /home/yjiang/liming/mule_hinny/analysis/tophat
+  
+  tophat --read-mismatches 10 \
+          --read-edit-dist 10 \
+          --output-dir /home/yjiang/liming/mule_hinny/analysis/tophat/$i \
+          --GTF /home/yjiang/database/horse/Equus_caballus.EquCab2.79.gtf \
+          --no-convert-bam \
+          /home/yjiang/database/horse/bowtie2.horse2 \
+          /home/yjiang/liming/mule_hinny/analysis/mule_sam_fastq/Last_fastq/$i\_1.fastq \
+          /home/yjiang/liming/mule_hinny/analysis/mule_sam_fastq/Last_fastq/$i\_2.fastq
+  done
+
+## 5.Divergent sites 
+  
+  python get_allelic_number_based_on_SNP.py
+
+## 6.Generate the speices info
+
+  python generate_reads_info_from_sam_4.0.py
+
+## 7.Distingguish the bam
+
+  python distingguish_species_sam.py
+
+## 8.Call ASE genes
+
+  python ASEgenesCaller.py
+  
+## 9.Merge all the samples
+
+  python join_ASE_result.py
+  
+  
+## 10.Quantitate the expression by Stringtie
+
+  stringtie -p 8 -G ~/genome.data/cattle/Cattle.GCF_000003055.6_Bos_taurus_UMD_3.1.1_genomic.gff -o /stor9000/apps/users/NWSUAF/2015060145/StringTie/cattle/stringtie.gtf/${i}.gtf -l ${i} /stor9000/apps/users/NWSUAF/2015060145/total_bam/cattle/genome/hisat_merge_tophat.bam/sort.bam/${i}.total.sort.bam
+  
+  stringtie --merge -p 8 -G ~/genome.data/cattle/Cattle.GCF_000003055.6_Bos_taurus_UMD_3.1.1_genomic.gff -o stringtie_merged.gtf cattle.mergelist.txt
+  
+  stringtie -e -B -p 8 -G ../stringtie_merged.gtf -o ~/StringTie/cattle/stringtie2ballgown/${i}/${i}.gtf /stor9000/apps/users/NWSUAF/2015060145/distinguish_species_bam/cattle/merge/sort.bam/${i}.sort.bam
+  
+## 11.Calculate the ASE genes by Ballgown in R
+
+  library(ballgown)
+  
+  library(RSkittleBrewer)
+  
+  library(genefilter)
+  
+  library(dplyr)
+  
+  library(devtools)
+  
+  bg=ballgown(dataDir = "ballgown.MF", samplePattern = "ASE")
+  
+  pData(bg) = data.frame(id=sampleNames(bg), group=rep(c(1,0),8))
+  
+  bg_filt = subset(bg,"rowVars(texpr(bg)) >1",genomesubset=TRUE)
+  
+  results_transcripts = stattest(bg_filt,feature="transcript",covariate="group",getFC=TRUE, meas="FPKM")
+  
+  results_genes = stattest(bg_filt, feature="gene",covariate="group",getFC=TRUE,meas="FPKM")
+  
+  results_transcripts = data.frame(geneNames=ballgown::geneNames(bg_filt),geneIDs=ballgown::geneIDs(bg_filt), results_transcripts)
+  
+  results_transcripts = arrange(results_transcripts,pval)
+  
+  results_genes = arrange(results_genes,pval)
+  
+  transcripts.sig<-subset(results_transcripts,results_transcripts$qval<0.05)
+  
+  gene.sig<-subset(results_genes,results_genes$qval<0.05)
+  
+  write.table(file="horse.all.ASE.gene.result",results_genes,quote=F,sep="\t",row.names=F,col.names=T)
+  
+  write.table(file="horse.all.ASE.gene.sig.result",gene.sig,quote=F,sep="\t",row.names=F,col.names=T)
+  
+  write.table(file="horse.all.ASE.transcripts.result",results_transcripts,quote=F,sep="\t",row.names=F,col.names=T)
+  
+  write.table(file="horse.all.ASE.transcripts.sig.result",transcripts.sig,quote=F,sep="\t",row.names=F,col.names=T)
+  
+  whole_tx_table = texpr(bg, 'all')
+
+
+
+
+
+
+
+
