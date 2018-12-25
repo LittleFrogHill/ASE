@@ -1,6 +1,6 @@
 # Pipeline of analysing ASE genes of hybrid animals
 
-## 1.trim.data Reads 质控
+## 1.Clean data
   resequencing data
   
     java -Xmx30g -jar /home/yjiang/software/Trimmomatic-0.33/trimmomatic-0.33.jar PE -threads 10 SRR1868837_1.fastq SRR1868837_2.fastq SRR1868837_1.clean.fq.gz SRR1868837_1.unpaired.fq.gz SRR1868837_2.clean.fq.gz SRR1868837_2.unpaired.fq.gz LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:40 TOPHRED33 >SRR1868837.log &
@@ -9,7 +9,7 @@
   
     java -Xmx30g -jar /home/yjiang/software/Trimmomatic-0.33/trimmomatic-0.33.jar PE -threads 10 SRR1868837_1.fastq SRR1868837_2.fastq SRR1868837_1.clean.fq.gz SRR1868837_1.unpaired.fq.gz SRR1868837_2.clean.fq.gz SRR1868837_2.unpaired.fq.gz LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:40 TOPHRED33 >SRR1868837.log &
     
-## 2.resequencing data mapping
+## 2.Resequencing data mapping
 
   bwa mapping
 
@@ -266,9 +266,13 @@ Tophat mapping
   
   whole_tx_table = texpr(bg, 'all')
 
+## 12.Alternative splcing deceting by rMATs
 
+  python ~/rMATS.4.0.1/rMATS-turbo-Linux-UCS2/rmats.py --b1 alt --b2 ref --gtf /stor9000/apps/users/NWSUAF/2012015204/splicing/ensembl_gtf/horse.NCBI.annotation.gtf --od result -t paired --nthread 8 --readLength 125
 
+## 13.Plot the alternative splcing events
 
+  rmats2sashimiplot --b1 bam1,bam2,bam3 --b2 bam3,bam4,bam5 -e event.txt --l1 donkey --l2 horse --exon_s 1 --intron_s 5 -o out -t SE
 
 
 
