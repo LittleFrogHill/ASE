@@ -205,7 +205,7 @@ Tophat mapping
 
 ## 7.Distingguish the bam
 
-   python distingguish_species_sam.py
+    python distingguish_species_sam.py
 
 ## 8.Call ASE genes
 
@@ -222,7 +222,7 @@ Tophat mapping
   
     stringtie --merge -p 8 -G ~/genome.data/cattle/Cattle.GCF_000003055.6_Bos_taurus_UMD_3.1.1_genomic.gff -o stringtie_merged.gtf cattle.mergelist.txt
   
-        stringtie -e -B -p 8 -G ../stringtie_merged.gtf -o ~/StringTie/cattle/stringtie2ballgown/${i}/${i}.gtf /stor9000/apps/users/NWSUAF/2015060145/distinguish_species_bam/cattle/merge/sort.bam/${i}.sort.bam
+    stringtie -e -B -p 8 -G ../stringtie_merged.gtf -o ~/StringTie/cattle/stringtie2ballgown/${i}/${i}.gtf /stor9000/apps/users/NWSUAF/2015060145/distinguish_species_bam/cattle/merge/sort.bam/${i}.sort.bam
   
 ## 11.Calculate the ASE genes by Ballgown in R
 
@@ -254,17 +254,17 @@ Tophat mapping
       
       transcripts.sig<-subset(results_transcripts,results_transcripts$qval<0.05)
   
-    gene.sig<-subset(results_genes,results_genes$qval<0.05)
+      gene.sig<-subset(results_genes,results_genes$qval<0.05)
     
-    write.table(file="horse.all.ASE.gene.result",results_genes,quote=F,sep="\t",row.names=F,col.names=T)
+      write.table(file="horse.all.ASE.gene.result",results_genes,quote=F,sep="\t",row.names=F,col.names=T)
     
-    write.table(file="horse.all.ASE.gene.sig.result",gene.sig,quote=F,sep="\t",row.names=F,col.names=T)
+      write.table(file="horse.all.ASE.gene.sig.result",gene.sig,quote=F,sep="\t",row.names=F,col.names=T)
     
-    write.table(file="horse.all.ASE.transcripts.result",results_transcripts,quote=F,sep="\t",row.names=F,col.names=T)
+      write.table(file="horse.all.ASE.transcripts.result",results_transcripts,quote=F,sep="\t",row.names=F,col.names=T)
     
-    write.table(file="horse.all.ASE.transcripts.sig.result",transcripts.sig,quote=F,sep="\t",row.names=F,col.names=T)
+      write.table(file="horse.all.ASE.transcripts.sig.result",transcripts.sig,quote=F,sep="\t",row.names=F,col.names=T)
     
-    whole_tx_table = texpr(bg, 'all')
+      whole_tx_table = texpr(bg, 'all')
 
 ## 12.Alternative splcing deceting by rMATs
 
