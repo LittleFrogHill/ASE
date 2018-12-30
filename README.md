@@ -197,82 +197,82 @@ Tophat mapping
 
 ## 5.Divergent sites 
   
-  python get_allelic_number_based_on_SNP.py
+    python get_allelic_number_based_on_SNP.py
 
 ## 6.Generate the speices info
 
-  python generate_reads_info_from_sam_4.0.py
+    python generate_reads_info_from_sam_4.0.py
 
 ## 7.Distingguish the bam
 
-  python distingguish_species_sam.py
+   python distingguish_species_sam.py
 
 ## 8.Call ASE genes
 
-  python ASEgenesCaller.py
+    python ASEgenesCaller.py
   
 ## 9.Merge all the samples
 
-  python join_ASE_result.py
+    python join_ASE_result.py
   
   
 ## 10.Quantitate the expression by Stringtie
 
-  stringtie -p 8 -G ~/genome.data/cattle/Cattle.GCF_000003055.6_Bos_taurus_UMD_3.1.1_genomic.gff -o /stor9000/apps/users/NWSUAF/2015060145/StringTie/cattle/stringtie.gtf/${i}.gtf -l ${i} /stor9000/apps/users/NWSUAF/2015060145/total_bam/cattle/genome/hisat_merge_tophat.bam/sort.bam/${i}.total.sort.bam
+    stringtie -p 8 -G ~/genome.data/cattle/Cattle.GCF_000003055.6_Bos_taurus_UMD_3.1.1_genomic.gff -o /stor9000/apps/users/NWSUAF/2015060145/StringTie/cattle/stringtie.gtf/${i}.gtf -l ${i} /stor9000/apps/users/NWSUAF/2015060145/total_bam/cattle/genome/hisat_merge_tophat.bam/sort.bam/${i}.total.sort.bam
   
-  stringtie --merge -p 8 -G ~/genome.data/cattle/Cattle.GCF_000003055.6_Bos_taurus_UMD_3.1.1_genomic.gff -o stringtie_merged.gtf cattle.mergelist.txt
+    stringtie --merge -p 8 -G ~/genome.data/cattle/Cattle.GCF_000003055.6_Bos_taurus_UMD_3.1.1_genomic.gff -o stringtie_merged.gtf cattle.mergelist.txt
   
-  stringtie -e -B -p 8 -G ../stringtie_merged.gtf -o ~/StringTie/cattle/stringtie2ballgown/${i}/${i}.gtf /stor9000/apps/users/NWSUAF/2015060145/distinguish_species_bam/cattle/merge/sort.bam/${i}.sort.bam
+        stringtie -e -B -p 8 -G ../stringtie_merged.gtf -o ~/StringTie/cattle/stringtie2ballgown/${i}/${i}.gtf /stor9000/apps/users/NWSUAF/2015060145/distinguish_species_bam/cattle/merge/sort.bam/${i}.sort.bam
   
 ## 11.Calculate the ASE genes by Ballgown in R
 
-  library(ballgown)
+      library(ballgown)
+      
+      library(RSkittleBrewer)
+      
+      library(genefilter)
+      
+      library(dplyr)
+      
+      library(devtools)
+      
+      bg=ballgown(dataDir = "ballgown.MF", samplePattern = "ASE")
+      
+      pData(bg) = data.frame(id=sampleNames(bg), group=rep(c(1,0),8))
+      
+      bg_filt = subset(bg,"rowVars(texpr(bg)) >1",genomesubset=TRUE)
+      
+      results_transcripts = stattest(bg_filt,feature="transcript",covariate="group",getFC=TRUE, meas="FPKM")
+      
+      results_genes = stattest(bg_filt, feature="gene",covariate="group",getFC=TRUE,meas="FPKM")
+      
+      results_transcripts = data.frame(geneNames=ballgown::geneNames(bg_filt),geneIDs=ballgown::geneIDs(bg_filt), results_transcripts)
+      
+      results_transcripts = arrange(results_transcripts,pval)
+      
+      results_genes = arrange(results_genes,pval)
+      
+      transcripts.sig<-subset(results_transcripts,results_transcripts$qval<0.05)
   
-  library(RSkittleBrewer)
-  
-  library(genefilter)
-  
-  library(dplyr)
-  
-  library(devtools)
-  
-  bg=ballgown(dataDir = "ballgown.MF", samplePattern = "ASE")
-  
-  pData(bg) = data.frame(id=sampleNames(bg), group=rep(c(1,0),8))
-  
-  bg_filt = subset(bg,"rowVars(texpr(bg)) >1",genomesubset=TRUE)
-  
-  results_transcripts = stattest(bg_filt,feature="transcript",covariate="group",getFC=TRUE, meas="FPKM")
-  
-  results_genes = stattest(bg_filt, feature="gene",covariate="group",getFC=TRUE,meas="FPKM")
-  
-  results_transcripts = data.frame(geneNames=ballgown::geneNames(bg_filt),geneIDs=ballgown::geneIDs(bg_filt), results_transcripts)
-  
-  results_transcripts = arrange(results_transcripts,pval)
-  
-  results_genes = arrange(results_genes,pval)
-  
-  transcripts.sig<-subset(results_transcripts,results_transcripts$qval<0.05)
-  
-  gene.sig<-subset(results_genes,results_genes$qval<0.05)
-  
-  write.table(file="horse.all.ASE.gene.result",results_genes,quote=F,sep="\t",row.names=F,col.names=T)
-  
-  write.table(file="horse.all.ASE.gene.sig.result",gene.sig,quote=F,sep="\t",row.names=F,col.names=T)
-  
-  write.table(file="horse.all.ASE.transcripts.result",results_transcripts,quote=F,sep="\t",row.names=F,col.names=T)
-  
-  write.table(file="horse.all.ASE.transcripts.sig.result",transcripts.sig,quote=F,sep="\t",row.names=F,col.names=T)
-  
-  whole_tx_table = texpr(bg, 'all')
+    gene.sig<-subset(results_genes,results_genes$qval<0.05)
+    
+    write.table(file="horse.all.ASE.gene.result",results_genes,quote=F,sep="\t",row.names=F,col.names=T)
+    
+    write.table(file="horse.all.ASE.gene.sig.result",gene.sig,quote=F,sep="\t",row.names=F,col.names=T)
+    
+    write.table(file="horse.all.ASE.transcripts.result",results_transcripts,quote=F,sep="\t",row.names=F,col.names=T)
+    
+    write.table(file="horse.all.ASE.transcripts.sig.result",transcripts.sig,quote=F,sep="\t",row.names=F,col.names=T)
+    
+    whole_tx_table = texpr(bg, 'all')
 
 ## 12.Alternative splcing deceting by rMATs
 
-  python ~/rMATS.4.0.1/rMATS-turbo-Linux-UCS2/rmats.py --b1 alt --b2 ref --gtf /stor9000/apps/users/NWSUAF/2012015204/splicing/ensembl_gtf/horse.NCBI.annotation.gtf --od result -t paired --nthread 8 --readLength 125
+    python ~/rMATS.4.0.1/rMATS-turbo-Linux-UCS2/rmats.py --b1 alt --b2 ref --gtf /stor9000/apps/users/NWSUAF/2012015204/splicing/ensembl_gtf/horse.NCBI.annotation.gtf --od result -t paired --nthread 8 --readLength 125
 
 ## 13.Plot the alternative splcing events
 
-  rmats2sashimiplot --b1 bam1,bam2,bam3 --b2 bam3,bam4,bam5 -e event.txt --l1 donkey --l2 horse --exon_s 1 --intron_s 5 -o out -t SE
+    rmats2sashimiplot --b1 bam1,bam2,bam3 --b2 bam3,bam4,bam5 -e event.txt --l1 donkey --l2 horse --exon_s 1 --intron_s 5 -o out -t SE
 
 
 
