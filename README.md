@@ -144,56 +144,56 @@
       
 umapped.sam2fastq
 
-  #!/bin/sh
+    #!/bin/sh
 
-  java -Xmx4g -jar /home/yjiang/liming/bin/picard-tools-1.119/SamToFastq.jar \
+    java -Xmx4g -jar /home/yjiang/liming/bin/picard-tools-1.119/SamToFastq.jar \
         INPUT=/home/yjiang/liming/mule_hinny/analysis/mule_sam_fastq/BHN1_L6_I026.unmap.sam \
         FASTQ=BHN1_L6_I026_1.fastq \
         SECOND_END_FASTQ=BHN1_L6_I026_2.fastq
         
 Tophat mapping
       
-  for i in 1 \
-  2 \
-  4 \
-  5 \
-  6 \
-  9 \
-  10 \
-  11 \
-  12 \
-  13 \
-  AFB_L4_I042 \
-  AHM-1_L2_I005 \
-  ANS-1_L2_I006 \
-  BFB_L4_I041 \
-  BHM1_L6_I026 \
-  BNS-1_L2_I007 \
-  CFB_L4_I044 \
-  CHM_L2_I008 \
-  CNS_L6_I027 \
-  DFB_L4_I045 \
-  DHM_L2_I010 \
-  DNS_L2_I011 \
-  EFB_L4_I046 \
-  EHM_L2_I021 \
-  ENS_L2_I012
-  
-  do
-  
-  mkdir /home/yjiang/liming/mule_hinny/analysis/tophat/$i/
-  
-  cd /home/yjiang/liming/mule_hinny/analysis/tophat
-  
-  tophat --read-mismatches 10 \
-          --read-edit-dist 10 \
-          --output-dir /home/yjiang/liming/mule_hinny/analysis/tophat/$i \
-          --GTF /home/yjiang/database/horse/Equus_caballus.EquCab2.79.gtf \
-          --no-convert-bam \
-          /home/yjiang/database/horse/bowtie2.horse2 \
-          /home/yjiang/liming/mule_hinny/analysis/mule_sam_fastq/Last_fastq/$i\_1.fastq \
-          /home/yjiang/liming/mule_hinny/analysis/mule_sam_fastq/Last_fastq/$i\_2.fastq
-  done
+    for i in 1 \
+    2 \
+    4 \
+    5 \
+    6 \
+    9 \
+    10 \
+    11 \
+    12 \
+    13 \
+    AFB_L4_I042 \
+    AHM-1_L2_I005 \
+    ANS-1_L2_I006 \
+    BFB_L4_I041 \
+    BHM1_L6_I026 \
+    BNS-1_L2_I007 \
+    CFB_L4_I044 \
+    CHM_L2_I008 \
+    CNS_L6_I027 \
+    DFB_L4_I045 \
+    DHM_L2_I010 \
+    DNS_L2_I011 \
+    EFB_L4_I046 \
+    EHM_L2_I021 \
+    ENS_L2_I012
+    
+    do
+    
+    mkdir /home/yjiang/liming/mule_hinny/analysis/tophat/$i/
+      
+    cd /home/yjiang/liming/mule_hinny/analysis/tophat
+    
+    tophat --read-mismatches 10 \
+            --read-edit-dist 10 \
+            --output-dir /home/yjiang/liming/mule_hinny/analysis/tophat/$i \
+            --GTF /home/yjiang/database/horse/Equus_caballus.EquCab2.79.gtf \
+            --no-convert-bam \
+            /home/yjiang/database/horse/bowtie2.horse2 \
+            /home/yjiang/liming/mule_hinny/analysis/mule_sam_fastq/Last_fastq/$i\_1.fastq \
+            /home/yjiang/liming/mule_hinny/analysis/mule_sam_fastq/Last_fastq/$i\_2.fastq
+    done
 
 ## 5.Divergent sites 
   
